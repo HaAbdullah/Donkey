@@ -1,0 +1,133 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.App {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.connection-status {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #000000;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.room-code-status {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+}
+
+.main-content {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.game-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.chat-sidebar {
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
+  background: #f8f9fa;
+  border-left: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.error-message {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: #dc3545;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  max-width: 300px;
+}
+
+.connecting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.connecting h2 {
+  color: #000000;
+  font-weight: 400;
+  font-size: 24px;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .chat-sidebar {
+    width: 100%;
+    height: 250px;
+    min-width: unset;
+    max-width: unset;
+    border-left: none;
+    border-top: 1px solid #dee2e6;
+    order: 2;
+    padding: 10px;
+  }
+  
+  .game-content {
+    order: 1;
+    width: 100%;
+  }
+  
+  .game-board {
+    max-width: 100vw;
+  }
+  
+  .connection-status {
+    top: 10px;
+    left: 10px;
+    font-size: 10px;
+    padding: 6px 12px;
+  }
+}

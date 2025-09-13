@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npx create-react-app:*)",
+      "Bash(npm create:*)",
+      "Bash(rmdir:*)",
+      "Bash(npm install:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(npm start)",
+      "Bash(npm run dev:*)",
+      "Bash(ipconfig)",
+      "Bash(npm run build:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c:*)",
+      "Bash(npx kill-port:*)",
+      "Read(//c/Users/abdul/OneDrive/Documents/Pictures/Screenshots/**)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
