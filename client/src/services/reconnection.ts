@@ -6,7 +6,7 @@ export class ReconnectionService {
   private maxReconnectionAttempts = 5;
   private reconnectionDelay = 1000; // Start with 1 second
   private maxReconnectionDelay = 30000; // Max 30 seconds
-  private reconnectionTimeout: number | null = null;
+  private reconnectionTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(socket: Socket) {
     this.socket = socket;
