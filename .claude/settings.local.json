@@ -17,7 +17,8 @@
       "Bash(cmd /c:*)",
       "Bash(npx kill-port:*)",
       "Read(//c/Users/abdul/OneDrive/Documents/Pictures/Screenshots/**)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

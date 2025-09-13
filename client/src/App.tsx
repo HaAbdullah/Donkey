@@ -36,7 +36,7 @@ function App() {
     // Determine server URL based on environment
     let serverUrl: string;
     
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.MODE === 'production') {
       // In production, use the Render backend URL
       serverUrl = import.meta.env.VITE_SERVER_URL || 'https://donkey-game-backend.onrender.com';
     } else {
@@ -63,7 +63,7 @@ function App() {
       setConnectionState('connected')
       
       // Start keep-alive service in production
-      if (process.env.NODE_ENV === 'production') {
+      if (import.meta.env.MODE === 'production') {
         keepAliveService.current?.start();
       }
     })

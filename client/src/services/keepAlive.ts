@@ -1,6 +1,6 @@
 // Keep-alive service to prevent Render free tier from sleeping
 export class KeepAliveService {
-  private intervalId: NodeJS.Timeout | null = null;
+  private intervalId: number | null = null;
   private serverUrl: string;
 
   constructor(serverUrl: string) {
