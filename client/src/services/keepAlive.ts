@@ -1,6 +1,6 @@
 // Keep-alive service to prevent Render free tier from sleeping
 export class KeepAliveService {
-  private intervalId: number | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
   private serverUrl: string;
 
   constructor(serverUrl: string) {
