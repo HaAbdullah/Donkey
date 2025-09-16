@@ -137,6 +137,12 @@ io.on('connection', (socket) => {
 
     const { room, roomCode, gameState } = validation;
 
+    // Check if player is still in the game (in turn order)
+    if (!gameState.turnOrder.includes(socket.id)) {
+      socket.emit('error', 'You have already finished the game');
+      return;
+    }
+
     if (gameState.turnOrder[gameState.currentTurnIndex] !== socket.id) {
       socket.emit('error', 'Not your turn');
       return;
@@ -184,6 +190,12 @@ io.on('connection', (socket) => {
     if (!validation) return;
 
     const { room, roomCode, gameState } = validation;
+
+    // Check if player is still in the game (in turn order)
+    if (!gameState.turnOrder.includes(socket.id)) {
+      socket.emit('error', 'You have already finished the game');
+      return;
+    }
 
     if (gameState.turnOrder[gameState.currentTurnIndex] !== socket.id) {
       socket.emit('error', 'Not your turn');
@@ -249,18 +261,44 @@ io.on('connection', (socket) => {
     // Clear the drawn card
     player.drawnCard = null;
 
-    // Check if game is over first
+    // Check if current player finished their cards
+    const currentPlayerFinished = player.deck.length === 0 && player.personalPile.length === 0;
+
+    if (currentPlayerFinished) {
+      console.log(`Player ${socket.id} finished all their cards!`);
+      // Remove player from turn order
+      const playerIndex = gameState.turnOrder.indexOf(socket.id);
+      gameState.turnOrder.splice(playerIndex, 1);
+
+      // Adjust current turn index if needed
+      if (gameState.currentTurnIndex >= gameState.turnOrder.length) {
+        gameState.currentTurnIndex = 0;
+      }
+      if (playerIndex < gameState.currentTurnIndex) {
+        gameState.currentTurnIndex--;
+      }
+    }
+
+    // Check if game is over
     if (isGameOver(gameState)) {
       io.to(roomCode).emit('gameOver', gameState);
       return;
     }
 
-    // Advance turn only if card was placed on personal pile
-    if (targetLocation.type === 'personal') {
-      gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
-      console.log(`Player ${socket.id} placed on personal pile, advancing turn to ${gameState.turnOrder[gameState.currentTurnIndex]}`);
+    // Advance turn logic
+    if (!currentPlayerFinished) {
+      // Player is still in the game
+      if (targetLocation.type === 'personal') {
+        gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+        console.log(`Player ${socket.id} placed on personal pile, advancing turn to ${gameState.turnOrder[gameState.currentTurnIndex]}`);
+      } else {
+        console.log(`Player ${socket.id} played drawn card successfully, gets another turn`);
+      }
     } else {
-      console.log(`Player ${socket.id} played drawn card successfully, gets another turn`);
+      // Player finished, turn naturally goes to next player
+      if (gameState.turnOrder.length > 0) {
+        console.log(`Player ${socket.id} finished, turn goes to ${gameState.turnOrder[gameState.currentTurnIndex]}`);
+      }
     }
 
     io.to(roomCode).emit('gameUpdate', gameState);
@@ -271,6 +309,12 @@ io.on('connection', (socket) => {
     if (!validation) return;
 
     const { room, roomCode, gameState } = validation;
+
+    // Check if player is still in the game (in turn order)
+    if (!gameState.turnOrder.includes(socket.id)) {
+      socket.emit('error', 'You have already finished the game');
+      return;
+    }
 
     if (gameState.turnOrder[gameState.currentTurnIndex] !== socket.id) {
       socket.emit('error', 'Not your turn');
@@ -327,14 +371,39 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Check if game is over first
+    // Check if current player finished their cards
+    const currentPlayerFinished = player.deck.length === 0 && player.personalPile.length === 0;
+
+    if (currentPlayerFinished) {
+      console.log(`Player ${socket.id} finished all their cards!`);
+      // Remove player from turn order
+      const playerIndex = gameState.turnOrder.indexOf(socket.id);
+      gameState.turnOrder.splice(playerIndex, 1);
+
+      // Adjust current turn index if needed
+      if (gameState.currentTurnIndex >= gameState.turnOrder.length) {
+        gameState.currentTurnIndex = 0;
+      }
+      if (playerIndex < gameState.currentTurnIndex) {
+        gameState.currentTurnIndex--;
+      }
+    }
+
+    // Check if game is over
     if (isGameOver(gameState)) {
       io.to(roomCode).emit('gameOver', gameState);
       return;
     }
 
-    // Don't advance turn when playing personal card successfully - player gets another turn
-    console.log(`Personal card played successfully for ${socket.id}, player gets another turn`);
+    if (!currentPlayerFinished) {
+      // Don't advance turn when playing personal card successfully - player gets another turn
+      console.log(`Personal card played successfully for ${socket.id}, player gets another turn`);
+    } else {
+      // Player finished, turn naturally goes to next player
+      if (gameState.turnOrder.length > 0) {
+        console.log(`Player ${socket.id} finished, turn goes to ${gameState.turnOrder[gameState.currentTurnIndex]}`);
+      }
+    }
 
     io.to(roomCode).emit('gameUpdate', gameState);
   });
@@ -367,6 +436,12 @@ io.on('connection', (socket) => {
     if (!validation) return;
 
     const { room, roomCode, gameState } = validation;
+
+    // Check if player is still in the game (in turn order)
+    if (!gameState.turnOrder.includes(socket.id)) {
+      socket.emit('error', 'You have already finished the game');
+      return;
+    }
 
     if (gameState.turnOrder[gameState.currentTurnIndex] !== socket.id) {
       socket.emit('error', 'Not your turn');
