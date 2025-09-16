@@ -11,6 +11,8 @@ interface GameBoardProps {
   onPlayPersonalCard: () => void;
   onFlipPersonalPile: () => void;
   onPlaceDrawnCard: (targetLocation: any) => void;
+  lastDrawnCard?: {playerId: string, playerName: string, card: any} | null;
+  lastPlayedCard?: {playerId: string, playerName: string, card: any, target: any} | null;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -20,7 +22,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
   onDrawCard,
   onPlayPersonalCard,
   onFlipPersonalPile,
-  onPlaceDrawnCard
+  onPlaceDrawnCard,
+  lastDrawnCard,
+  lastPlayedCard
 }) => {
   const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
   const isMyTurn = gameState.turnOrder[gameState.currentTurnIndex] === currentPlayerId;
@@ -67,6 +71,36 @@ const GameBoard: React.FC<GameBoardProps> = ({
     }
   };
 
+  // Helper function to determine if a card can be played on a starter pile
+  const canPlayOnStarterPile = (card: any, suit: string, pile: any[]) => {
+    if (!card) return false;
+
+    // Check if card is same suit
+    if (card.suit !== suit) return false;
+
+    // If pile is empty, only Ace can be played
+    if (pile.length === 0) {
+      return card.rank === 'A';
+    }
+
+    // If pile has cards, check if new card is next in sequence
+    const topCard = pile[pile.length - 1];
+    const rankOrder = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const currentRankIndex = rankOrder.indexOf(topCard.rank);
+    const newRankIndex = rankOrder.indexOf(card.rank);
+
+    return newRankIndex === currentRankIndex + 1;
+  };
+
+  // Get the card that would be played (either drawn card or top personal card)
+  const getActiveCard = () => {
+    if (hasDrawnCard) return currentPlayer?.drawnCard;
+    if (playingPersonalCard && currentPlayer?.personalPile.length) {
+      return currentPlayer.personalPile[currentPlayer.personalPile.length - 1];
+    }
+    return null;
+  };
+
   return (
     <div className="game-board">
       <div className={`turn-indicator ${isMyTurn ? 'my-turn' : ''}`}>
@@ -83,25 +117,53 @@ const GameBoard: React.FC<GameBoardProps> = ({
         )}
       </div>
 
+      {lastDrawnCard && (
+        <div className="drawn-card-notification">
+          <div className="notification-content">
+            <span className="player-name">{lastDrawnCard.playerName}</span> drew <Card card={lastDrawnCard.card} />
+          </div>
+        </div>
+      )}
+
+      {lastPlayedCard && (
+        <div className="played-card-notification">
+          <div className="notification-content">
+            <span className="player-name">{lastPlayedCard.playerName}</span> played <Card card={lastPlayedCard.card} />
+            {lastPlayedCard.target.type === 'starter' && (
+              <span> on {lastPlayedCard.target.suit} pile</span>
+            )}
+            {lastPlayedCard.target.type === 'player' && (
+              <span> on {lastPlayedCard.target.playerName}'s pile</span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="game-table-container">
         <div className="game-table">
           <div className="table-center">
             <div className="starter-piles">
-              {Object.entries(gameState.starterPiles).map(([suit, pile]) => (
-                <div 
-                  key={suit} 
-                  className={`starter-pile ${suit} ${(playingPersonalCard || hasDrawnCard) ? 'clickable-pile' : ''}`}
-                  onClick={() => handleStarterPileClick(suit)}
-                >
-                  <div className="pile-label">{suit}</div>
-                  {pile.length > 0 ? (
-                    <Card card={pile[pile.length - 1]} />
-                  ) : (
-                    <div className="empty-pile">Need Ace</div>
-                  )}
-                  <div className="pile-count">{pile.length}</div>
-                </div>
-              ))}
+              {Object.entries(gameState.starterPiles).map(([suit, pile]) => {
+                const activeCard = getActiveCard();
+                const canPlay = activeCard && canPlayOnStarterPile(activeCard, suit, pile);
+                const shouldHighlight = isMyTurn && canPlay && (playingPersonalCard || hasDrawnCard);
+
+                return (
+                  <div
+                    key={suit}
+                    className={`starter-pile ${suit} ${(playingPersonalCard || hasDrawnCard) ? 'clickable-pile' : ''} ${shouldHighlight ? 'valid-play-highlight' : ''}`}
+                    onClick={() => handleStarterPileClick(suit)}
+                  >
+                    <div className="pile-label">{suit}</div>
+                    {pile.length > 0 ? (
+                      <Card card={pile[pile.length - 1]} />
+                    ) : (
+                      <div className="empty-pile">Need Ace</div>
+                    )}
+                    <div className="pile-count">{pile.length}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -115,7 +177,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
             <div key={player.id} className={`player-seat ${positionClass} ${isCurrentPlayer ? 'current-player' : ''}`}>
               <h4>{playerInfo?.name} {isCurrentPlayer && '(You)'}</h4>
               <div className="deck-info">
-                Cards: {player.deck.length}
+                Cards: {player.deck.length + player.personalPile.length}
               </div>
               <div 
                 className={`personal-pile ${(playingPersonalCard && !isCurrentPlayer) || (hasDrawnCard && !isCurrentPlayer) ? 'clickable-pile' : ''}`}
