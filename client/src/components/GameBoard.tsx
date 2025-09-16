@@ -202,16 +202,13 @@ const GameBoard: React.FC<GameBoardProps> = ({
               <div className="drawn-card-info">
                 You drew: <Card card={currentPlayer.drawnCard!} />
               </div>
-              <button 
+              <button
                 onClick={handlePlaceOnPersonalPile}
                 className="action-button"
                 style={{ backgroundColor: '#ffc107', color: '#000' }}
               >
                 Place on Personal Pile
               </button>
-              <div className="wait-message">
-                Or click on a starter pile or another player's pile to play it there
-              </div>
             </>
           ) : (
             <>
