@@ -162,10 +162,18 @@ io.on('connection', (socket) => {
     }
 
     const drawnCard = player.deck.pop();
-    
+
     // Store the drawn card temporarily for player to decide where to place it
     player.drawnCard = drawnCard;
     console.log(`Player ${socket.id} drew ${drawnCard.rank} of ${drawnCard.suit}, awaiting placement decision`);
+
+    // Broadcast to all players which card was drawn and by whom
+    const playerName = room.players.get(socket.id)?.name || 'Unknown Player';
+    io.to(roomCode).emit('cardDrawn', {
+      playerId: socket.id,
+      playerName: playerName,
+      card: drawnCard
+    });
 
     // Don't advance turn yet - player needs to decide where to place the card
     io.to(roomCode).emit('gameUpdate', gameState);
@@ -203,6 +211,15 @@ io.on('connection', (socket) => {
         gameState.starterPiles[suit].push(drawnCard);
         cardPlayed = true;
         console.log(`Player ${socket.id} placed drawn card on ${suit} starter pile`);
+
+        // Broadcast card play event
+        const playerName = room.players.get(socket.id)?.name || 'Unknown Player';
+        io.to(roomCode).emit('cardPlayed', {
+          playerId: socket.id,
+          playerName: playerName,
+          card: drawnCard,
+          target: { type: 'starter', suit: suit }
+        });
       }
     } else if (targetLocation.type === 'player') {
       // Try to play on specified player's personal pile
@@ -211,6 +228,16 @@ io.on('connection', (socket) => {
         targetPlayer.personalPile.push(drawnCard);
         cardPlayed = true;
         console.log(`Player ${socket.id} placed drawn card on ${targetLocation.playerId}'s personal pile`);
+
+        // Broadcast card play event
+        const playerName = room.players.get(socket.id)?.name || 'Unknown Player';
+        const targetPlayerName = room.players.get(targetLocation.playerId)?.name || 'Unknown Player';
+        io.to(roomCode).emit('cardPlayed', {
+          playerId: socket.id,
+          playerName: playerName,
+          card: drawnCard,
+          target: { type: 'player', playerId: targetLocation.playerId, playerName: targetPlayerName }
+        });
       }
     }
 
@@ -222,6 +249,12 @@ io.on('connection', (socket) => {
     // Clear the drawn card
     player.drawnCard = null;
 
+    // Check if game is over first
+    if (isGameOver(gameState)) {
+      io.to(roomCode).emit('gameOver', gameState);
+      return;
+    }
+
     // Advance turn only if card was placed on personal pile
     if (targetLocation.type === 'personal') {
       gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
@@ -230,11 +263,7 @@ io.on('connection', (socket) => {
       console.log(`Player ${socket.id} played drawn card successfully, gets another turn`);
     }
 
-    if (isGameOver(gameState)) {
-      io.to(roomCode).emit('gameOver', gameState);
-    } else {
-      io.to(roomCode).emit('gameUpdate', gameState);
-    }
+    io.to(roomCode).emit('gameUpdate', gameState);
   });
 
   socket.on('playPersonalCard', (targetLocation) => {
@@ -263,6 +292,15 @@ io.on('connection', (socket) => {
       if (suit === topCard.suit && canPlayOnStarterPile(topCard, gameState.starterPiles[suit])) {
         gameState.starterPiles[suit].push(topCard);
         cardPlayed = true;
+
+        // Broadcast card play event
+        const playerName = room.players.get(socket.id)?.name || 'Unknown Player';
+        io.to(roomCode).emit('cardPlayed', {
+          playerId: socket.id,
+          playerName: playerName,
+          card: topCard,
+          target: { type: 'starter', suit: suit }
+        });
       }
     } else if (targetLocation.type === 'player') {
       // Try to play on specified player's personal pile
@@ -270,6 +308,16 @@ io.on('connection', (socket) => {
       if (targetPlayer && targetPlayer.id !== socket.id && canPlayOnPersonalPile(topCard, targetPlayer.personalPile)) {
         targetPlayer.personalPile.push(topCard);
         cardPlayed = true;
+
+        // Broadcast card play event
+        const playerName = room.players.get(socket.id)?.name || 'Unknown Player';
+        const targetPlayerName = room.players.get(targetLocation.playerId)?.name || 'Unknown Player';
+        io.to(roomCode).emit('cardPlayed', {
+          playerId: socket.id,
+          playerName: playerName,
+          card: topCard,
+          target: { type: 'player', playerId: targetLocation.playerId, playerName: targetPlayerName }
+        });
       }
     }
 
@@ -279,14 +327,16 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // Check if game is over first
+    if (isGameOver(gameState)) {
+      io.to(roomCode).emit('gameOver', gameState);
+      return;
+    }
+
     // Don't advance turn when playing personal card successfully - player gets another turn
     console.log(`Personal card played successfully for ${socket.id}, player gets another turn`);
 
-    if (isGameOver(gameState)) {
-      io.to(roomCode).emit('gameOver', gameState);
-    } else {
-      io.to(roomCode).emit('gameUpdate', gameState);
-    }
+    io.to(roomCode).emit('gameUpdate', gameState);
   });
 
   socket.on('chatMessage', (message) => {

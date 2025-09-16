@@ -45,7 +45,6 @@ const RoomSelection: React.FC<RoomSelectionProps> = ({
     <div className="room-selection">
       <div className="room-selection-container">
         <h1 className="game-title">🫏 Donkey Card Game</h1>
-        <p className="game-subtitle">Play with friends online!</p>
 
         <div className="player-name-section">
           <label htmlFor="playerName">Your Name:</label>

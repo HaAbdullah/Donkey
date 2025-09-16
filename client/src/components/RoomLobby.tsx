@@ -63,9 +63,6 @@ const RoomLobby: React.FC<RoomLobbyProps> = ({
             </div>
           </div>
 
-          <div className="share-instructions">
-            <p>📤 Share this room code with your friends so they can join!</p>
-          </div>
         </div>
 
         <div className="players-section">

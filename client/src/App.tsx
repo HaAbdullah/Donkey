@@ -28,7 +28,9 @@ function App() {
   const [players, setPlayers] = useState<PlayerInfo[]>([])
   const [error, setError] = useState<string>('')
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
-  
+  const [lastDrawnCard, setLastDrawnCard] = useState<{playerId: string, playerName: string, card: any} | null>(null)
+  const [lastPlayedCard, setLastPlayedCard] = useState<{playerId: string, playerName: string, card: any, target: any} | null>(null)
+
   const keepAliveService = useRef<KeepAliveService | null>(null)
   const reconnectionService = useRef<ReconnectionService | null>(null)
 
@@ -129,6 +131,18 @@ function App() {
 
     newSocket.on('chatMessage', (chatData: ChatMessage) => {
       setChatMessages(prev => [...prev, chatData])
+    })
+
+    newSocket.on('cardDrawn', (cardData: {playerId: string, playerName: string, card: any}) => {
+      setLastDrawnCard(cardData)
+      // Clear the drawn card info after 3 seconds
+      setTimeout(() => setLastDrawnCard(null), 3000)
+    })
+
+    newSocket.on('cardPlayed', (playData: {playerId: string, playerName: string, card: any, target: any}) => {
+      setLastPlayedCard(playData)
+      // Clear the play info after 3 seconds
+      setTimeout(() => setLastPlayedCard(null), 3000)
     })
 
     setSocket(newSocket)
@@ -233,6 +247,8 @@ function App() {
               onPlayPersonalCard={handlePlayPersonalCard}
               onFlipPersonalPile={handleFlipPersonalPile}
               onPlaceDrawnCard={handlePlaceDrawnCard}
+              lastDrawnCard={lastDrawnCard}
+              lastPlayedCard={lastPlayedCard}
             />
           </div>
           
