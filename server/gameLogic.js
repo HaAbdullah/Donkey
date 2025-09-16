@@ -89,15 +89,20 @@ function isGameOver(gameState) {
   const playersWithCards = gameState.players.filter(
     player => player.deck.length > 0 || player.personalPile.length > 0
   );
-  
-  if (playersWithCards.length <= 1) {
-    if (playersWithCards.length === 1) {
-      gameState.donkey = playersWithCards[0].id;
-    }
+
+  // Game is only over when exactly 1 player has cards left (the Donkey)
+  if (playersWithCards.length === 1) {
+    gameState.donkey = playersWithCards[0].id;
     gameState.gameOver = true;
     return true;
   }
-  
+
+  // Edge case: if somehow no players have cards (shouldn't happen in normal gameplay)
+  if (playersWithCards.length === 0) {
+    gameState.gameOver = true;
+    return true;
+  }
+
   return false;
 }
 
