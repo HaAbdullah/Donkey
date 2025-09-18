@@ -235,6 +235,7 @@
   .join-room-buttons {
     flex-direction: column;
   }
+<<<<<<< HEAD
 }
 
 .game-logo {
@@ -252,4 +253,6 @@
 
 .donkey-image:hover {
   transform: scale(1.05); /* Even bigger on hover! */
+=======
+>>>>>>> f0c194bba06ea047a9fbc88f79a1cfe382aea018
 }
