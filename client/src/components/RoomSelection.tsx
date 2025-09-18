@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './RoomSelection.css';
+import DonkeyImage from '../assets/Donkey.png';
 
 interface RoomSelectionProps {
   onCreateRoom: (playerName: string) => void;
@@ -44,8 +45,11 @@ const RoomSelection: React.FC<RoomSelectionProps> = ({
   return (
     <div className="room-selection">
       <div className="room-selection-container">
-        <h1 className="game-title">🫏 Donkey Card Game</h1>
-
+        
+        <div className="game-logo">
+          <img src={DonkeyImage} alt="Donkey" className="donkey-image" />
+        </div>
+        
         <div className="player-name-section">
           <label htmlFor="playerName">Your Name:</label>
           <input
@@ -121,9 +125,6 @@ const RoomSelection: React.FC<RoomSelectionProps> = ({
           </div>
         )}
 
-        <div className="room-selection-footer">
-          <p>💡 <strong>Tip:</strong> Share your room code with friends so they can join!</p>
-        </div>
       </div>
     </div>
   );
